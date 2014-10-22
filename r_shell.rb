@@ -1,25 +1,33 @@
-
+require 'shell'
 class RShell
 #  attr_reader working_directory
 
-  def initialize
-    @working_directory = Dir.pwd
-    @shell_name = 'RShell'
-    run
-  end
+	def initialize
+		@working_directory = Dir.pwd
+		@shell_name = 'RShell'
+		run
+	end
 
-  def run
-  input = nil
-    until input.to_s == 'exit'
-
-      input = gets.strip.split ' '
-      cmd = input[0]
-      args = input[1..input.length]
-      puts "#{@shell_name}: #{cmd}: command not found"
-
-    end
-  end
-
+	def run
+#		trap('INT', 'IGNORE')
+		input = nil
+		shell = Shell.new
+		
+		#until input.to_s == 'exit'
+		loop do begin	
+			input = gets.strip
+			if(  input.to_s == 'exit' )
+				return
+			end
+			
+			f = IO.popen(input)
+			puts f.readlines
+			f.close
+			
+		rescue Interrupt
+			puts ""
+		end end
+	end
 
 end
 RShell.new

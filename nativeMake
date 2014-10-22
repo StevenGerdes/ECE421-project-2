@@ -1,2 +1,0 @@
-swig -ruby clock.i
-gcc -shared -o clock.so clock.c clock_wrap.c -I/opt/rh/ruby193/root/usr/include/ -I/opt/rh/ruby193/root/usr/include/x86_64-linux/ -fPIC
