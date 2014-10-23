@@ -7,6 +7,7 @@ class RShell
 		run
 	end
 
+  #Run command starts R_Shell, looping infinitely for input until the eit command is given.
 	def run
 		input = nil
 		
