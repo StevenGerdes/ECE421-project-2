@@ -7,6 +7,7 @@ class Timer
 		@wait_time = wait_time_ms.to_i * @@nsec_per_msec
 	end
 
+  #Start the timer, if it is already running do nothing
 	def start
 		if(@running)
 			return
@@ -20,6 +21,7 @@ class Timer
 		}, @wait_time )
 	end
 
+  #Stop the timer
 	def stop
 		if(@running)
 			Defer.stop(@job_id)
@@ -27,15 +29,18 @@ class Timer
 		set_end
 	end
 
+  #restart the timer by stopping and starting
 	def restart
 		stop
 		start
 	end
-	
+
+  #check if the timer is running
 	def running?
 		@running
 	end
-	
+
+  #returns the time that the timer last finished
 	def last_run
 		@last_run
 	end
