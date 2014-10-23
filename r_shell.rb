@@ -10,7 +10,8 @@ class RShell
 	def run
 		input = nil
 		
-		loop do begin	
+		loop do 
+		begin	
 			print '>'
 			input = gets.strip.split('|')
 			if(  input.to_s == 'exit' )
@@ -33,10 +34,11 @@ class RShell
 				end
 			}
 			puts lastOutPut unless lastOutPut.nil?
-			
-		rescue Interrupt
+		rescue Exception	
 			puts ""
-		end end
+		end
+		
+		end
 	end
 
 end
