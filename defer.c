@@ -23,6 +23,9 @@ typedef struct
 
 JobArray g_jobs;
 
+/*
+ * Add a new job to the job list
+ */
 void addJob(JobArray *jobs, Job *newJob)
 {
 	if( jobs->size == jobs->capacity )
@@ -40,6 +43,9 @@ void addJob(JobArray *jobs, Job *newJob)
 	jobs->elements[jobs->size - 1] = newJob;
 }
 
+/*
+ * Remove a job from the job list
+ */
 Job* removeJob( JobArray *jobs, int pos )
 {
 	Job *removedJob = jobs->elements[pos];
@@ -57,6 +63,9 @@ Job* removeJob( JobArray *jobs, int pos )
 	return removedJob;
 }
 
+/*
+ * Remove a job based on pointer value
+ */
 void removeJobByPointer( JobArray *jobs, Job* job)
 {
 	int i; 
@@ -70,6 +79,9 @@ void removeJobByPointer( JobArray *jobs, Job* job)
 	}
 }
 
+/*
+ * Finds job to run and runs it.
+ */
 void handler( int signal )
 {
 	struct timespec now;
@@ -99,6 +111,9 @@ void handler( int signal )
 	free( jobToRun );
 }
 
+/*
+ * Stop a job from being running
+ */
 void stop( long id )
 {
 	
@@ -117,7 +132,9 @@ void stop( long id )
 		printf("sigprocmask");
 }
 
-
+/*
+ * Called externally to add a job to be run.
+ */
 long deferNanoSec(callback_t callback, void *proc_obj, long long nanoSecs)
 { 
 	timer_t timerid;
