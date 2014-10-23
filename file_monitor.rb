@@ -22,6 +22,8 @@ class FileMonitor
 		@threads = Hash.new
 	end
 
+  # watches the file_list for a alt_type of operation.
+  # Once this operation occurs it waits a duration of time before performing the operation
 	def FileWatch(alt_type, duration, file_list, &operation)
 		
 		case alt_type 
@@ -44,6 +46,7 @@ class FileMonitor
 		end
 	end
 
+  # Stop watching the specified file for the specified alt_type alteration
 	def StopWatch(file, alt_type)
 		@threads[file + alt_type.to_s].exit
 	end
