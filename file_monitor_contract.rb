@@ -8,6 +8,7 @@ class FileMonitorContract < Test::Unit::TestCase
     duration = 10000
     list_of_files = ["#{ENV['path']}/out.txt", 'file2', 'file3']
     file_text = 'yay I created a file'
+    monitor = FileMonitor.new
 
     std_out_message = StringIO.new
     $stdout = std_out_message
@@ -17,8 +18,7 @@ class FileMonitorContract < Test::Unit::TestCase
     assert_respond_to( duration, :to_i )
     assert_respond_to( list_of_files, :each )
 
-    FileMonitor.watch( alteration_type, duration, list_of_files ){|file| puts File.read(file) }
-
+    monitor.FileWatch( alteration_type, duration, list_of_files ){|file| puts File.read(file) }
 
     out_file = File.new('out.txt', 'w')
     out_file.puts(file_text)

@@ -64,7 +64,7 @@ class TimerContract < Test::Unit::TestCase
     timer.start
 
     #precondition
-    assert_true( timer.is_running, true )
+    assert_true( timer.running?, true )
 
     timer.stop
 
