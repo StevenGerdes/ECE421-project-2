@@ -1,6 +1,4 @@
-require 'fileNotify'
-#require 'defer'
-
+require 'deferFileNotify'
 class FileMonitor
 	
 	@@IN_ACCESS = 0x00000001	# File was accessed.
@@ -18,8 +16,8 @@ class FileMonitor
 	@@IN_DELETE_SELF = 0x00000400	# Self was deleted.
 	@@IN_MOVE_SELF = 0x00000800	# Self was moved.  
 	
-	def Initalize
-		@threads = Hash.new
+	def initialize
+		@children = Hash.new
 	end
 
 	def FileWatch(alt_type, duration, file_list, &operation)
@@ -31,21 +29,32 @@ class FileMonitor
 			mask = @@IN_DELETE | @@IN_DELETE_SELF
 		when :alteration
 			mask = @@IN_ATTRIB | @@IN_MODIFY
+		else
+			puts 'invalid alteration type'
+			return
 		end
 
-		file_list.each do |file|
-			@threads[file+alt_type.to_s] = Thread.new{ 
-				loop do
-					FileNotify.watch(file, mask)#blocks so no running on thread
-					puts file
-					#Defer.delayNanoSec(operation, duration)
-				end
-			}
+		file_list.each do |path|
+				
+				pathFile = File.expand_path(path)		
+				dir = File.dirname(pathFile)
+				file = File.basename(pathFile);
+				@children[path+alt_type.to_s] = fork{ 
+					loop do
+						DeferFileNotify.watch(dir, file, mask)#blocks so no running on thread
+						sleep(duration)
+						operation.call
+					end
+				}
 		end
 	end
 
-	def StopWatch(file, alt_type)
-		@threads[file + alt_type.to_s].exit
+	def StopWatch(path, alt_type)
+		begin
+			Process.kill(:SIGINT,@children[path + alt_type.to_s])
+		rescue Exception #when killing a process it throws an exception, we don't care about that though
+			@children.delete(path + alt_type.to_s)
+		end
 	end
 
 end

@@ -1,30 +1,36 @@
-require 'defer'
+require 'deferFileNotify'
 
 class Timer
 	@@nsec_per_msec = 1000000
 	def initialize(message, wait_time_ms)
 		@message = message
+		if !wait_time_ms.respond_to? :to_i
+			puts 'invalid wait time: setting it to one second'
+			wait_time_ms = 1000
+		end
 		@wait_time = wait_time_ms.to_i * @@nsec_per_msec
 	end
 
   #Start the timer, if it is already running do nothing
 	def start
 		if(@running)
-			return
+			return @start_time
 		end
 
 		@running = true
-		@job_id = Defer.deferNanoSec(Proc.new{
+		@job_id = DeferFileNotify.deferNanoSec(Proc.new{
 			puts @message
 			@last_run = Time.now
 			set_end
 		}, @wait_time )
+		@start_time = Time.now
+		return @start_time
 	end
 
   #Stop the timer
 	def stop
 		if(@running)
-			Defer.stop(@job_id)
+			DeferFileNotify.stop(@job_id)
 		end
 		set_end
 	end
@@ -47,6 +53,7 @@ class Timer
 
 private
 	def set_end
+		@start_time = nil
 		@running = false
 	end
 end
