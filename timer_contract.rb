@@ -29,7 +29,30 @@ class TimerContract < Test::Unit::TestCase
     assert_equal(timer.message, internal_message)
   end
 
-  def test_end
+	def test_start_twice
+		wait_time = 3000 
+		message = 'message'
+		timer = Timer.new(wait_time, message )
+
+
+		#invariant
+		internal_message = timer.message
+
+		#precondition
+		#none
+
+		start_time = timer.start
+		sleep(1)
+		second_start_time = timer.start
+
+		#postcondition
+		assert_equal(start_time, second_start_time)
+
+		#invarients
+		assert_equal(timer.message, internal_message)
+	end
+
+  def test_stop
     timer = Timer.new(1000 * 60, 'message' )
 
     std_out_message = StringIO.new
@@ -43,7 +66,7 @@ class TimerContract < Test::Unit::TestCase
     #precondition
     assert_true( timer.is_running, true )
 
-    timer.end
+    timer.stop
 
     #postcondition
     assert_empty(std_out_message.string)

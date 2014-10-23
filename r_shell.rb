@@ -1,28 +1,38 @@
-require 'shell'
+require 'timer'
+
 class RShell
 #  attr_reader working_directory
 
 	def initialize
-		@working_directory = Dir.pwd
-		@shell_name = 'RShell'
 		run
 	end
 
 	def run
-#		trap('INT', 'IGNORE')
 		input = nil
-		shell = Shell.new
 		
-		#until input.to_s == 'exit'
 		loop do begin	
-			input = gets.strip
+			print '>'
+			input = gets.strip.split('|')
 			if(  input.to_s == 'exit' )
 				return
 			end
 			
-			f = IO.popen(input)
-			puts f.readlines
-			f.close
+			lastOutPut = nil
+			input.each{|cmd|
+				if cmd.start_with? 'cd ' 
+					Dir.chdir(cmd[3..-1])
+					lastOutPut = nil
+				elsif cmd.start_with? 'timer '
+					Timer.new(*(cmd[6..-1].split(' '))).start
+				else		
+					IO.popen(cmd, "r+") do |pipe|
+						pipe.puts lastOutPut unless lastOutPut.nil?
+						pipe.close_write  
+						lastOutPut = pipe.read.to_s
+					end
+				end
+			}
+			puts lastOutPut unless lastOutPut.nil?
 			
 		rescue Interrupt
 			puts ""
@@ -30,5 +40,3 @@ class RShell
 	end
 
 end
-RShell.new
-#I was under the impression that we cannot use backtics as the linux shell "doesn't exist"

@@ -21,6 +21,8 @@ typedef struct
 	int capacity;
 } JobArray;
 
+JobArray g_jobs;
+
 void addJob(JobArray *jobs, Job *newJob)
 {
 	if( jobs->size == jobs->capacity )
@@ -44,7 +46,7 @@ Job* removeJob( JobArray *jobs, int pos )
 	int i;
 	for( i = pos; i < jobs->size - 1; i++ )
 		jobs->elements[i] = jobs->elements[i+1];
-	jobs->elements[jobs->size] = NULL;
+	jobs->elements[jobs->size - 1] = NULL;
 	jobs->size--;
 	if( jobs->size == 0 )//just in case we stop using this then we won't waste any memory
 	{
@@ -55,7 +57,18 @@ Job* removeJob( JobArray *jobs, int pos )
 	return removedJob;
 }
 
-JobArray g_jobs;
+void removeJobByPointer( JobArray *jobs, Job* job)
+{
+	int i; 
+	for( i = 0; i < jobs->size; i++ )
+	{
+		if( jobs->elements[i] == job )
+		{
+			removeJob(jobs, i);
+			break;
+		}
+	}
+}
 
 void handler( int signal )
 {
@@ -79,20 +92,39 @@ void handler( int signal )
 		}
 	}
 
+	if( jobToRun == NULL )
+		return;
+
 	jobToRun->callback(jobToRun->proc_obj);
 	free( jobToRun );
 }
 
-
-
-void deferNanoSec(callback_t callback, void *proc_obj, long long nanoSecs)
+void stop( long id )
 {
+	
+	/* Block timer signal temporarily */
+	sigset_t mask;
+	sigemptyset(&mask);
+	sigaddset(&mask, SIG);
+	if (sigprocmask(SIG_SETMASK, &mask, NULL) == -1)
+		printf("sigprocmask");
+
+	removeJobByPointer( &g_jobs, (Job*) id);
+	
+	/* Unlock the timer signal, so that timer notification
+	 *               can be delivered */
+	if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == -1)
+		printf("sigprocmask");
+}
+
+
+long deferNanoSec(callback_t callback, void *proc_obj, long long nanoSecs)
+{ 
 	timer_t timerid;
 	struct sigevent sev;
 	struct itimerspec its;
 	sigset_t mask;
 	struct sigaction sa;
-
 
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = handler;
@@ -137,7 +169,8 @@ void deferNanoSec(callback_t callback, void *proc_obj, long long nanoSecs)
 
 	/* Unlock the timer signal, so that timer notification
 	 *               can be delivered */
-
 	if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == -1)
 		printf("sigprocmask");
+
+	return (long)job;
 }

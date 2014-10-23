@@ -1846,6 +1846,48 @@ SWIG_AsVal_long_SS_long (VALUE obj, long long *val)
 }
 
 
+#include <limits.h>
+#if !defined(SWIG_NO_LLONG_MAX)
+# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
+#   define LLONG_MAX __LONG_LONG_MAX__
+#   define LLONG_MIN (-LLONG_MAX - 1LL)
+#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
+# endif
+#endif
+
+
+  #define SWIG_From_long   LONG2NUM 
+
+
+/*@SWIG:/usr/local/share/swig/3.0.2/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
+SWIGINTERN VALUE SWIG_AUX_NUM2LONG(VALUE *args)
+{
+  VALUE obj = args[0];
+  VALUE type = TYPE(obj);
+  long *res = (long *)(args[1]);
+  *res = type == T_FIXNUM ? NUM2LONG(obj) : rb_big2long(obj);
+  return obj;
+}
+/*@SWIG@*/
+
+SWIGINTERN int
+SWIG_AsVal_long (VALUE obj, long* val)
+{
+  VALUE type = TYPE(obj);
+  if ((type == T_FIXNUM) || (type == T_BIGNUM)) {
+    long v;
+    VALUE a[2];
+    a[0] = obj;
+    a[1] = (VALUE)(&v);
+    if (rb_rescue(RUBY_METHOD_FUNC(SWIG_AUX_NUM2LONG), (VALUE)a, RUBY_METHOD_FUNC(SWIG_ruby_failed), 0) != Qnil) {
+      if (val) *val = v;
+      return SWIG_OK;
+    }
+  }
+  return SWIG_TypeError;
+}
+
+
     #include "defer.h"
 
 SWIGINTERN VALUE
@@ -1855,6 +1897,8 @@ _wrap_deferNanoSec(int argc, VALUE *argv, VALUE self) {
   long long arg3 ;
   long long val3 ;
   int ecode3 = 0 ;
+  long result;
+  VALUE vresult = Qnil;
   
   if ((argc < 2) || (argc > 2)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
@@ -1868,7 +1912,29 @@ _wrap_deferNanoSec(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(ecode3), Ruby_Format_TypeError( "", "long long","deferNanoSec", 3, argv[1] ));
   } 
   arg3 = (long long)(val3);
-  deferNanoSec(arg1,arg2,arg3);
+  result = (long)deferNanoSec(arg1,arg2,arg3);
+  vresult = SWIG_From_long((long)(result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_stop(int argc, VALUE *argv, VALUE self) {
+  long arg1 ;
+  long val1 ;
+  int ecode1 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  ecode1 = SWIG_AsVal_long(argv[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), Ruby_Format_TypeError( "", "long","stop", 1, argv[0] ));
+  } 
+  arg1 = (long)(val1);
+  stop(arg1);
   return Qnil;
 fail:
   return Qnil;
@@ -2151,5 +2217,6 @@ SWIGEXPORT void Init_defer(void) {
   
   SWIG_RubyInitializeTrackings();
   rb_define_module_function(mDefer, "deferNanoSec", _wrap_deferNanoSec, -1);
+  rb_define_module_function(mDefer, "stop", _wrap_stop, -1);
 }
 
